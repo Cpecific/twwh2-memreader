@@ -18,7 +18,7 @@ local rawNumber = mr.read_int32(ptr, 0x14, true) -- returns userdata
 assert(luaNumber == mr.tonumber(rawNumber)) -- conversion to lua_Number
 luaNumber = luaNumber + 0x0150
 -- !!! DO NOT USE BASIC LUA OPERATORS ON RETURNED userdata !!!
--- !!! USE PROVIDED LIBRARY FUNCTIONS INSTEAD			   !!!
+-- !!! USE PROVIDED LIBRARY FUNCTIONS INSTEAD              !!!
 rawNumber = mr.add(rawNumber, 0x0150) -- also: sub, mult, div
 -- assert(luaNumber == mr.tonumber(rawNumber)) -- could be false due to precision loss?
 
