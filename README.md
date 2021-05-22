@@ -96,85 +96,85 @@ Better just nag at CA to enable this functionality.
 # API Reference
 Notation `typeA:typeB` stands for: pass `typeA` value, library will treat (cast) it as `typeB` value.\
 Don't confuse with `argName: type`.\
-### `pointer(string:LPVOID): pointer`
-### `pointer(pointer): pointer`
+#### `pointer(string:LPVOID): pointer`
+#### `pointer(pointer): pointer`
 Returns new userdata pointer. String conversion requires sizeof(LPVOID)=8 bytes of data.
-### `uint8(float): uint8`
-### `int8(float): int8`
-### `uint16(float): uint16`
-### `int16(float): int16`
-### `uint32(float): uint32`
-### `int32(float): int32`
+#### `uint8(float): uint8`
+#### `int8(float): int8`
+#### `uint16(float): uint16`
+#### `int16(float): int16`
+#### `uint32(float): uint32`
+#### `int32(float): int32`
 Returns new userdata uint8..int32
-### `uint32(string:UINT32): uint32`
-### `int32(string:UINT32): int32`
+#### `uint32(string:UINT32): uint32`
+#### `int32(string:UINT32): int32`
 String conversion requires sizeof(UINT32)=4 bytes of data.
 
 ## Addition +
-### `add(float, float): float`
-### `add(float, uint8..int32): float`
-### `add(pointer, float:UINT32): pointer`
-### `add(pointer, string:UINT32): pointer`
-### `add(pointer, uint8..int32): pointer`
-### `add(uint8..int32, float:UINT32): uint8..int32`
-### `add(uint8..int32, string:UINT32): uint8..int32`
-### `add(uint8..int32, uint8..int32): uint8..int32`
+#### `add(float, float): float`
+#### `add(float, uint8..int32): float`
+#### `add(pointer, float:UINT32): pointer`
+#### `add(pointer, string:UINT32): pointer`
+#### `add(pointer, uint8..int32): pointer`
+#### `add(uint8..int32, float:UINT32): uint8..int32`
+#### `add(uint8..int32, string:UINT32): uint8..int32`
+#### `add(uint8..int32, uint8..int32): uint8..int32`
 
 ## Subtraction -
-### `sub(float, float): float`
-### `sub(float, uint8..int32): float`
-### `sub(pointer, float:UINT32): pointer`
-### `sub(pointer, string:UINT32): pointer`
-### `sub(pointer, pointer): pointer`
-### `sub(pointer, uint8..int32): pointer`
-### `sub(uint8..int32, float:UINT32): uint8..int32`
-### `sub(uint8..int32, string:UINT32): uint8..int32`
-### `sub(uint8..int32, uint8..int32): uint8..int32`
+#### `sub(float, float): float`
+#### `sub(float, uint8..int32): float`
+#### `sub(pointer, float:UINT32): pointer`
+#### `sub(pointer, string:UINT32): pointer`
+#### `sub(pointer, pointer): pointer`
+#### `sub(pointer, uint8..int32): pointer`
+#### `sub(uint8..int32, float:UINT32): uint8..int32`
+#### `sub(uint8..int32, string:UINT32): uint8..int32`
+#### `sub(uint8..int32, uint8..int32): uint8..int32`
 
 ## Multiplication *
-### `mult(float, float): float`
-### `mult(float, uint8..int32): float`
-### `mult(uint8..int32, float:UINT32): uint8..int32`
-### `mult(uint8..int32, string:UINT32): uint8..int32`
-### `mult(uint8..int32, uint8..int32): uint8..int32`
+#### `mult(float, float): float`
+#### `mult(float, uint8..int32): float`
+#### `mult(uint8..int32, float:UINT32): uint8..int32`
+#### `mult(uint8..int32, string:UINT32): uint8..int32`
+#### `mult(uint8..int32, uint8..int32): uint8..int32`
 
 ## Division /
-### `div(float, float): float`
-### `div(float, uint8..int32): float`
-### `div(pointer:ptrdiff_t, float:UINT32): pointer`
-### `div(pointer:ptrdiff_t, string:UINT32): pointer`
-### `div(pointer:ptrdiff_t, uint8..int32): pointer`
-### `div(uint8..int32, float:UINT32): uint8..int32`
-### `div(uint8..int32, string:UINT32): uint8..int32`
-### `div(uint8..int32, uint8..int32): uint8..int32`
+#### `div(float, float): float`
+#### `div(float, uint8..int32): float`
+#### `div(pointer:ptrdiff_t, float:UINT32): pointer`
+#### `div(pointer:ptrdiff_t, string:UINT32): pointer`
+#### `div(pointer:ptrdiff_t, uint8..int32): pointer`
+#### `div(uint8..int32, float:UINT32): uint8..int32`
+#### `div(uint8..int32, string:UINT32): uint8..int32`
+#### `div(uint8..int32, uint8..int32): uint8..int32`
 
 ## Comparison
-### `eq(pointer, string:LPVOID): boolean`
-### `eq(pointer, pointer): boolean`
-### `eq(uint32..int32, float:UINT32): boolean`
-### `eq(uint32..int32, string:UINT32): boolean`
-### `eq(uint32..int32, uint32..int32): boolean`
-### `eq := ==`
-### `lt := <`
-### `gt := >`
+#### `eq(pointer, string:LPVOID): boolean`
+#### `eq(pointer, pointer): boolean`
+#### `eq(uint32..int32, float:UINT32): boolean`
+#### `eq(uint32..int32, string:UINT32): boolean`
+#### `eq(uint32..int32, uint32..int32): boolean`
+#### `eq := ==`
+#### `lt := <`
+#### `gt := >`
 `eq`, `lt` and `gt` have the exact same function declarations.
 
 
 ## Reading
-### `read_float(pointer, [offset]): float`
-### `read_pointer(pointer, [offset]): pointer`
-### `read_uint8(pointer, [offset]): float`
-### `read_uint8(pointer, [offset], return_userdata: boolean): uint8`
-### `same function declarations for int8..int32`
+#### `read_float(pointer, [offset]): float`
+#### `read_pointer(pointer, [offset]): pointer`
+#### `read_uint8(pointer, [offset]): float`
+#### `read_uint8(pointer, [offset], return_userdata: boolean): uint8`
+#### `same function declarations for int8..int32`
 If you pass `return_userdata=true`, then function will return userdata uint8..int32, instead of casting it to float\
 Optional argument `offset` can be passed with types:\
 `nil=0`\
 `float:UINT32`\
 `string:UINT32`\
 `uint32..int32`
-### `read_boolean(pointer, [offset]): boolean`
+#### `read_boolean(pointer, [offset]): boolean`
 Will return `true` if `byte ~= 0x00`
-### `read_string(pointer, [offset], isPtr: boolean, isWide: boolean): string`
+#### `read_string(pointer, [offset], isPtr: boolean, isWide: boolean): string`
 Structure for string `{ INT32 size; INT32 capacity; char *pStr; }`\
 `isWide=true` will return wchar_t raw data (not very userful in Lua)\
 If you pass `isPtr=true`, then library will do the following:
@@ -182,12 +182,12 @@ If you pass `isPtr=true`, then library will do the following:
 local ptr = read_pointer(ptr, offset)
 return read_string(ptr, 0, false, isWide)
 ```
-### `read_array(pointer, [offset]): float, pointer`
-### `read_array(pointer, [offset], return_userdata: boolean): int32, pointer`
+#### `read_array(pointer, [offset]): float, pointer`
+#### `read_array(pointer, [offset], return_userdata: boolean): int32, pointer`
 Structure for array `{ INT32 capacity; INT32 size; LPVOID pData; }`\
 Returns size of array and pointer to data.
 
-### `read_rowidx(pEntry: pointer, [offset], base: pointer, entry_size: float): float`
+#### `read_rowidx(pEntry: pointer, [offset], base: pointer, entry_size: float): float`
 Basically library does the following:
 ```lua
 local entry = read_pointer(pEntry, offset)
@@ -198,16 +198,16 @@ Reads `bytes` from memory. String contains raw data. It is not null terminated.
 
 
 ## Writing
-### `write(pointer, [offset], boolean)`
-### `write(pointer, [offset], float)`
-### `write(pointer, [offset], string)`
-### `write(pointer, [offset], pointer)`
-### `write(pointer, [offset], uint8..int32)`
+#### `write(pointer, [offset], boolean)`
+#### `write(pointer, [offset], float)`
+#### `write(pointer, [offset], string)`
+#### `write(pointer, [offset], pointer)`
+#### `write(pointer, [offset], uint8..int32)`
 Write functionality hasn't been tested yet.
 
 
 ## Modules
-### `modules(): { base: pointer, size: float, name: string, path: string }`
+#### `modules(): { base: pointer, size: float, name: string, path: string }`
 ```lua
 for module in mr.modules() do
 	out('base = '.. mr.tostring(module.base) ..', size = '.. tostring(module.size) ..', name = '.. module.name ..', path = '.. module.path)
@@ -216,46 +216,46 @@ end
 
 
 ## Misc: type
-### `type(nil): 'nil'`
-### `type(boolean): 'boolean'`
-### `type(float): 'float'`
-### `type(string): 'bytes'`
-### `type(pointer): 'pointer'`
-### `type(uint8..int32): 'uint8'..'int32'`
+#### `type(nil): 'nil'`
+#### `type(boolean): 'boolean'`
+#### `type(float): 'float'`
+#### `type(string): 'bytes'`
+#### `type(pointer): 'pointer'`
+#### `type(uint8..int32): 'uint8'..'int32'`
 
 ## Misc: tostring
-### `tostring(nil | boolean | number): tostring`
+#### `tostring(nil | boolean | number): tostring`
 Behaves same as default lua tostring function.
-### `tostring(string): string`
+#### `tostring(string): string`
 Returns hex representation of string.
-### `tostring(pointer): string // %p`
-### `tostring(uint8): string // %hhu`
-### `tostring(int8): string // %hhd`
-### `tostring(uint16): string // %hu`
-### `tostring(int16): string // %hd`
-### `tostring(uint32): string // %u`
-### `tostring(int32): string // %d`
+#### `tostring(pointer): string // %p`
+#### `tostring(uint8): string // %hhu`
+#### `tostring(int8): string // %hhd`
+#### `tostring(uint16): string // %hu`
+#### `tostring(int16): string // %hd`
+#### `tostring(uint32): string // %u`
+#### `tostring(int32): string // %d`
 Refer to `sprintf_s` documentation.
 
 ## Misc: tonumber
-### `tonumber(float:UINT32): float`
-### `tonumber(string:UINT32): float`
-### `tonumber(pointer): float`
-### `tonumber(uint32..int32): float`
+#### `tonumber(float:UINT32): float`
+#### `tonumber(string:UINT32): float`
+#### `tonumber(pointer): float`
+#### `tonumber(uint32..int32): float`
 
 ## Misc: userdata
-### `ud_topointer(userdata): pointer`
+#### `ud_topointer(userdata): pointer`
 Returns pointer of userdata value.
 ```lua
 local chptr = ud_topointer(character)
 chptr = read_pointer(chptr, 0x10)
 local cqi = read_int32(chptr, 0xF0)
 ```
-### `ud_debug(userdata): float, pointer`
+#### `ud_debug(userdata): float, pointer`
 Returns lua type of value (TValue.tt) and pointer value `p` (TValue.value.p). Refer to lua documentation and source code.
 
 ## Misc: createtable
-### `createtable(narr, nrec): table`
+#### `createtable(narr, nrec): table`
 Creates new table with preallocated space narr (raw array part) and nrec (hash part)\
 `narr` and `nrec` can be the following types:\
 `float:UINT32`\
