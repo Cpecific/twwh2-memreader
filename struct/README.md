@@ -1,5 +1,6 @@
 # Structure definitions
 This directory contains decoded game structures.\
+Decided not to write all decoded structures in js, because current project is crude. Feel free to suggest on how to improve basic functionaility.\
 If you want to contribute, then only publish js code, don't publish Reclass.net project file (I will sync the changes when I have free time). It would be good to make Reclass.net project file generation from js, but it seems too much of an effort (from quick REClass.net source code inspection).\
 Alternatively you can [use lua inside of Cheat Engine](https://wiki.cheatengine.org/index.php?title=Lua).
 ```lua
@@ -76,8 +77,7 @@ struct CA_Shit_List<T> {
 // They are not continious, some (DB_DATA) are overwritten with junk
 // [[[<Warhammer2.exe>+03601F98]+20]+10]
 // [[[base + 03601F40 + 50 + 08]+20]+10]
-const b = require('@base')
-const { LinkedList } = require('@base/LinkedList')
+const b = require('@basic')
 const uic_db = require('@static/uic_db')
 let ptr = b.read_pointer(b.base, 0x03601F40) // @static/uic_db.base
 let uic_db_entry = b.read_instance(undefined, ptr, 0x00, uic_db.static_uic_db)
@@ -108,12 +108,13 @@ ptr = read_pointer(ptr, 0x10)
 // Better to programmatically do it with js over all children of root.
 // [[[[[<Warhammer2.exe>+03737E08]+18]+50]+08]]
 // [[[[[base + 03737E00 + 08]+18]+50]+08]]
-const b = require('@base')
-const { wrapPointer } = require('@base/WrapPointer')
+const b = require('@basic')
+const { wrapPtr } = require('@basic/WrapPtr')
 const { UIC } = require('@uic')
 let ptr = b.base + 0x03737E00
-let arr = b.read_array(undefined, ptr, 0x00, wrapPointer(UIC))
-for (const uic of arr.data()) { // items[]: 0x08
+let arr = b.read_array(undefined, ptr, 0x00, wrapPtr(UIC))
+for (let uic of arr.data()) { // items[]: 0x08
+	uic = uic.data
 	// 0x18: idx = 4
 	if (uic.name === 'war_coordination_buttonset') {
 		let ptr = uic._pointer
