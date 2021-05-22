@@ -109,16 +109,16 @@ ptr = read_pointer(ptr, 0x10)
 // [[[[[<Warhammer2.exe>+03737E08]+18]+50]+08]]
 // [[[[[base + 03737E00 + 08]+18]+50]+08]]
 const b = require('@base')
-const { WrapPointer } = require('@base/WrapPointer')
+const { wrapPointer } = require('@base/WrapPointer')
 const { UIC } = require('@uic')
 let ptr = b.base + 0x03737E00
-let arr = b.read_array(undefined, ptr, 0x00, WrapPointer(UIC))
+let arr = b.read_array(undefined, ptr, 0x00, wrapPointer(UIC))
 for (const uic of arr.data()) { // items[]: 0x08
 	// 0x18: idx = 4
 	if (uic.name === 'war_coordination_buttonset') {
 		let ptr = uic._pointer
 		ptr = b.read_pointer(ptr, 0x50) // UIC.cco_selected? => $uic__cco_selected?
-		ptr = b.read_pointer(ptr, 0x08) // @character.Character__details
+		ptr = b.read_pointer(ptr, 0x08) // @character.CharacterDetails
 		ptr = b.read_pointer(ptr, 0x00) // @character.Character
 		let cqi = b.read_int32(ptr, 0xF0)
 		break;
@@ -137,7 +137,7 @@ local CA_cip = root:SequentialFind(
 local ptr = ud_topointer(CA_cip)
 ptr = read_pointer(ptr, 0x00) -- @uic.UIC
 ptr = read_pointer(ptr, 0x50) -- cco_selected
-ptr = read_pointer(ptr, 0x08) -- @character.Character__details
+ptr = read_pointer(ptr, 0x08) -- @character.CharacterDetails
 ptr = read_pointer(ptr, 0x00) -- @character.Character
 local cqi = read_int32(ptr, 0xF0)
 ```
