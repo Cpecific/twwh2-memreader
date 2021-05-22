@@ -1,0 +1,22 @@
+{
+	"name": "twwh2-memreader",
+	"version": "1.0.0",
+	"description": "",
+	"main": "struct/index.js",
+	"scripts": {
+		"create-symlink-windows:basic": "mklink /D node_modules\\@basic ..\\struct\\$basic",
+		"create-symlink-windows:character": "mklink /D node_modules\\@character ..\\struct\\$character",
+		"create-symlink-windows:db": "mklink /D node_modules\\@db ..\\struct\\$db",
+		"create-symlink-windows:static": "mklink /D node_modules\\@static ..\\struct\\$static",
+		"create-symlink-windows:uic": "mklink /D node_modules\\@uic ..\\struct\\$uic",
+		"create-symlink-windows": "run-p create-symlink-windows:*",
+		"test": "node test/read_1.js"
+	},
+	"author": "",
+	"license": "ISC",
+	"dependencies": {
+		"memoryjs": "^3.4.0",
+		"npm-run-all": "^4.1.5"
+	},
+	"devDependencies": {}
+}

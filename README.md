@@ -5,7 +5,6 @@ Designed specificially for Total War Warhammer 2.\
 Only works on Windows x64.
 ```lua
 local mr = assert(_G.memreader)
--- alternatively you can do local mr = require('twwh2-memreader')
 local ptr = mr.base -- ex: 0x0000000140000000
 out(mr.tostring(ptr)) -- 140000000
 -- read pointer at address (base + 0x03601F98)
@@ -64,6 +63,12 @@ mr.tostring(chptr) -- ex: 4EB62210
 -- after that you can do
 chptr = mr.read_pointer(chptr, 0x10)
 -- and now you have access to $pHero structure
+```
+
+# Installation
+```
+npm install
+npm run create-symlink-windows
 ```
 
 
@@ -198,6 +203,7 @@ Reads `bytes` from memory. String contains raw data. It is not null terminated.
 ### `write(pointer, [offset], string)`
 ### `write(pointer, [offset], pointer)`
 ### `write(pointer, [offset], uint8..int32)`
+Write functionality hasn't been tested yet.
 
 
 ## Modules
@@ -209,7 +215,7 @@ end
 ```
 
 
-## Miscellaneous: type
+## Misc: type
 ### `type(nil): 'nil'`
 ### `type(boolean): 'boolean'`
 ### `type(float): 'float'`
@@ -217,7 +223,7 @@ end
 ### `type(pointer): 'pointer'`
 ### `type(uint8..int32): 'uint8'..'int32'`
 
-## Miscellaneous: tostring
+## Misc: tostring
 ### `tostring(nil | boolean | number): tostring`
 Behaves same as default lua tostring function.
 ### `tostring(string): string`
@@ -231,13 +237,13 @@ Returns hex representation of string.
 ### `tostring(int32): string // %d`
 Refer to `sprintf_s` documentation.
 
-## Miscellaneous: tonumber
+## Misc: tonumber
 ### `tonumber(float:UINT32): float`
 ### `tonumber(string:UINT32): float`
 ### `tonumber(pointer): float`
 ### `tonumber(uint32..int32): float`
 
-## Miscellaneous: userdata
+## Misc: userdata
 ### `ud_topointer(userdata): pointer`
 Returns pointer of userdata value.
 ```lua
@@ -248,7 +254,7 @@ local cqi = read_int32(chptr, 0xF0)
 ### `ud_debug(userdata): float, pointer`
 Returns lua type of value (TValue.tt) and pointer value `p` (TValue.value.p). Refer to lua documentation and source code.
 
-## Miscellaneous: createtable
+## Misc: createtable
 ### `createtable(narr, nrec): table`
 Creates new table with preallocated space narr (raw array part) and nrec (hash part)\
 `narr` and `nrec` can be the following types:\

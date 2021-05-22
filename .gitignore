@@ -1,0 +1,15 @@
+_assets/
+twwh2-memreader/.vs
+twwh2-memreader/out
+script/memreader/bin/*
+node_modules/
+!node_modules/@basic
+!node_modules/@character
+!node_modules/@db
+!node_modules/@static
+!node_modules/@uic
+*.code-workspace
+test/**/my-*
+test/**/my_*
+text/**/my-*
+text/**/my_*

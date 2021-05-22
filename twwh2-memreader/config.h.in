@@ -1,0 +1,2 @@
+#define twwh2_memreader_VERSION_MAJOR ${twwh2_memreader_VERSION_MAJOR}
+#define twwh2_memreader_VERSION_MINOR ${twwh2_memreader_VERSION_MINOR}
