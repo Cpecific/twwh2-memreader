@@ -261,3 +261,85 @@ Creates new table with preallocated space narr (raw array part) and nrec (hash p
 `float:UINT32`\
 `string:UINT32`\
 `uint32..int32`
+
+# Barebones example
+```lua
+-- there are still a lot more of variable declarations, but you should get the point
+local mr = _G.memreader
+local gi = cm:get_game_interface()
+local model = gi:model()
+local root, static_ptr
+core:add_listener(
+    '',
+    'UICreated',
+    true,
+    function(context)
+	root = core.ui_root
+        local ptr = mr.base
+        ptr = read_pointer(ptr, '\152\31\96\3') -- 0x03601F98
+        ptr = read_pointer(ptr, 0x20)
+        ptr = read_pointer(ptr, 0x10)
+        static_ptr = ptr ---@static_ptr
+    end,
+    false)
+local function getTable(idx)
+    local table_ptr = read_pointer(static_ptr, 56 * idx)
+    local size, pData = read_array(table_ptr, 0x08)
+    local pFirst = read_pointer(pData, 0x00)
+    return size, pFirst
+end
+local tbl_forbidden_subtypes
+local function LoadData()
+    if tbl_forbidden_subtypes then return end
+    tbl_forbidden_subtypes = createtable(0, 10) -- we expect a little bit of forbidden subtypes
+    local size, ptr = getTable(490) -- agent_subtypes_tables
+    for i = 1, size do
+        local can_gain_xp = read_boolean(ptr, 0x70)
+        if not can_gain_xp then
+            local key = read_string(ptr, 0x50, true, false)
+            tbl_forbidden_subtypes[ key ] = true
+        end
+        ptr = add(ptr, 144)
+    end
+end
+local function get_chptr(character) return read_pointer(ud_topointer(character), 0x10) end
+local function loadAvailablePoints(chptr)
+    if not chptr then return 0 end
+    return read_int32(chptr, 0x0610)
+end
+local function FetchSelectedCharacter()
+	local CA_cip = root:SequentialFind(
+			'layout',
+			'info_panel_holder',
+			'primary_info_panel_holder',
+			'info_panel_background',
+			'CharacterInfoPopup')
+	local ptr = ud_topointer(CA_cip)
+	ptr = read_pointer(ptr, 0x00) -- $uic
+	ptr = read_pointer(ptr, 0x50) -- cco_selected
+	if eq(ptr, '\0\0\0\0\0\0\0\0') then return end -- should never happen
+	ptr = read_pointer(ptr, 0x08) -- $pHero.details
+	ptr = read_pointer(ptr, 0x00) -- $pHero
+	local cqi = read_int32(ptr, 0xF0)
+	local character = model:character_for_command_queue_index(cqi)
+	local member = character:family_member()
+	local static_cqi = member:command_queue_index()
+	return character, cqi, static_cqi
+end
+core:add_listener(
+	'',
+	'CharacterSelected',
+	true,
+	function(context)
+		local character, cqi, static_cqi = FetchSelectedCharacter()
+		if not character then return end
+		LoadData()
+		local subtype_key = character:character_subtype_key()
+		if tbl_forbidden_subtypes[ subtype_key ] then return end
+		local chptr = get_chptr(character)
+		local available_points = loadAvailablePoints(chptr)
+		if available_points == 0 then return end
+		-- do stuff
+	end,
+	true)
+```
