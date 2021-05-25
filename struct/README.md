@@ -142,3 +142,69 @@ ptr = read_pointer(ptr, 0x08) -- @character.CharacterDetails
 ptr = read_pointer(ptr, 0x00) -- @character.Character
 local cqi = read_int32(ptr, 0xF0)
 ```
+
+## Some useful info
+### effect_bonus_value
+`ebv` is defined as:
+```
+0x00: uniq_key[ebv_table_row(20 bits), 0(20 bits), bonus_value_id(16 bits), ebv_table_id(8 bits)]
+0x08: bonus_value_id(16 bits)
+0x0A: ebv_table_id(8 bits)
+0x0B: ???(40 bits)
+0x10: union // treated dynamically based in ebv_table_id
+// In most cases it is the same value, that parent entity' `value`.
+// (ex: character_trait_level__effects has `value` field, and `ebv.value == value`)
+// But I've seen one case where they are not the same. Not sure why
+0x18: value(float)
+0x1C: value(float) 
+```
+`ebv_table_id` value is mapped like this:
+```
+[0x1D] = 'ebv_agent_action_record'
+[0x00] = 'ebv_agent'
+[0x20] = 'ebv_agent_subtype'
+[0x1E] = 'ebv_attrition_record'
+[0x01] = 'ebv_basic'
+[0x17] = 'ebv_battle_context_army_special_ability'
+[0x14] = 'ebv_battle_context'
+[0x15] = 'ebv_battle_context_unit_ability' (doesn't work in effect_bundles)
+[0x16] = 'ebv_battle_context_unit_attribute'
+[0x18] = 'ebv_battlefield_deployables' (doesn't work)
+[0x02] = 'ebv_building_chain' (doesn't work)
+[0x19] = 'ebv_building_set'
+[0x09] = 'ebv_faction'
+[0x12] = 'ebv_id_action_results_additional_outcomes'
+[0x1A] = 'ebv_ids_units_sets'
+[0x28] = 'ebv_loyalty_event'
+[0x2B] = 'ebv_missile_weapon'
+[0x1F] = 'ebv_name_record'
+[0x23] = 'ebv_military_force_ability'
+[0x29] = 'ebv_pooled_resource_facotr'
+[0x2A] = 'ebv_pooled_resource'
+[0x03] = 'ebv_population_class' (doesn't exist)
+[????] = 'ebv_population_class_and_religion' (doesn't load)
+[0x05] = 'ebv_projectile' (works)
+[0x06] = 'ebv_projectile_shot_type_enum' (doesn't work)
+[0x13] = 'ebv_provincial_initiative_effect_record'
+[0x07] = 'ebv_religion'
+[0x0A] = 'ebv_resource'
+[0x2C] = 'ebv_ritual_category'
+[0x25] = 'ebv_ritual_chains' (works)
+[0x24] = 'ebv_ritual'
+[0x10] = 'ebv_siege_item'
+[0x22] = 'ebv_special_ability_phase_record'
+[0x08] = 'ebv_subculture'
+[0x11] = 'ebv_technology_category' (works)
+[0x1B] = 'ebv_technology' (doesn't work)
+[0x0B] = 'ebv_unit_abilitiy'
+[0x21] = 'ebv_unit_attribute'
+[0x0E] = 'ebv_unit_caste' (works)
+[????] = 'ebv_unit_caste_stat_modifiers' (doesn't load)
+[0x0D] = 'ebv_unit_category' (works)
+[????] = 'ebv_unit_category_stat_modifiers' (doesn't load)
+[0x0C] = 'ebv_unit_class' (works)
+[????] = 'ebv_unit_class_stat_modifiers' (doesn't load)
+[0x0F] = 'ebv_unit_record'
+[0x27] = 'ebv_unit_set_unit_ability'
+[0x26] = 'ebv_unit_set_unit_attribute'
+```
