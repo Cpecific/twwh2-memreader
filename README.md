@@ -349,12 +349,12 @@ Userdata is a bunch of bytes that `C` programm allocates and you can somehow acc
 ```lua
 local function get_chptr(character) return read_pointer(ud_topointer(character), 0x10) end
 ```
-This example may confuse some, so let me explain. When CA was incorporating lua into their engine, they understood that at some point some people would create dll lua libraries (such as this one). They modified `tostring` function to print type of userdata correctly.\
-For example,\
+The example above may confuse some, so let me explain. When CA was incorporating lua into their engine, they understood that at some point some people would create dll lua libraries (such as this one). They modified `tostring` function to print type of userdata correctly.\
+For example:\
 `tostring(core.ui_root)` will give you `UIComponent (000000006BCEE520)`\
 `tostring(character)` will give you `CHARACTER_SCRIPT_INTERFACE (0000000062BBC3C8)`\
-but `tostring(ud_topointer(character))` will give you `userdata: 0000000062BBC3C8`\
-but `tostring(get_chptr(character))` will give you `userdata: 00000000E376A7A8`.\
+`tostring(ud_topointer(character))` will give you `userdata: 0000000062BBC3C8`\
+`tostring(get_chptr(character))` will give you `userdata: 00000000E376A7A8`.\
 How does CA differentiate dynamic structure that external libraries (such as `memreader`) create?\
-Well, in most cases, they allocate 3 pointers of data. They look at first 2 pointers (which can be a little bit unsafe, as they have no idea of the size of userdata, unless they go really deep into the rabbit hole of lua source) and based on the values of these first pointers they can determine, whether it is CA userdata or external userdata.\
-Those pointers point to some static data, it doesn't matter what it contains. The actual pointer to `character` or other entity of your interest can be found at `0x08` or `0x10` offset. But don't take my word for it. In the example above, you would go to `0000000062BBC3C8` address, and look at the data yourself. Best print several different of such userdata structures, to be completely sure. In `Reclass.net` you would look for `<HEAP>00000000E376A7A8` pointer. Don't bother with `<DATA>Warhammer2.exe.14...` pointers.
+Well, in most cases, they allocate 2/3 pointers of data. They look at first 1/2 pointers (which can be a little bit unsafe, as they have no idea of the size of userdata, unless they go really deep into the rabbit hole of lua source) and based on the values of these first pointers they can determine, whether it is CA userdata or external userdata.\
+Those pointers point to some static data, it doesn't matter what it contains. The actual pointer to `character` or other entity of your interest can be found at `0x08` or `0x10` offset. But don't take my word for it. In the example above, you would go to `0000000062BBC3C8` address, and look at the data yourself. Best print and check several different of such userdata structures, to be completely sure. In `Reclass.net` you would look for `<HEAP>00000000E376A7A8` pointer. Don't bother with `<DATA>Warhammer2.exe.14...` pointers.
