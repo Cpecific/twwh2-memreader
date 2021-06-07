@@ -37,10 +37,10 @@ if not status or mr.version ~= APP_VERSION then
 	collectgarbage()
 	collectgarbage()
 	-- we don't need to cache value of the file (don't use require)
-    local data = assert(loadfile('/script/memreader/bin/'.. platform))()
-    local file = assert(io.open(filename .. ext, 'wb'))
-    file:write(data)
-    file:close()
+	local data = assert(loadfile('/script/memreader/bin/'.. platform))()
+	local file = assert(io.open(filename .. ext, 'wb'))
+	file:write(data)
+	file:close()
 
 	package.loaded[ filename ] = nil
 	mr = require(filename)

@@ -349,12 +349,17 @@ Userdata is a bunch of bytes that `C` programm allocates and you can somehow acc
 ```lua
 local function get_chptr(character) return read_pointer(ud_topointer(character), 0x10) end
 ```
-The example above may confuse some, so let me explain. When CA was incorporating lua into their engine, they understood that at some point some people would create dll lua libraries (such as this one). They modified `tostring` function to print type of userdata correctly.\
-For example:\
-`tostring(core.ui_root)` will give you `UIComponent (000000006BCEE520)`\
-`tostring(character)` will give you `CHARACTER_SCRIPT_INTERFACE (0000000062BBC3C8)`\
-`tostring(ud_topointer(character))` will give you `userdata: 0000000062BBC3C8`\
-`tostring(get_chptr(character))` will give you `userdata: 00000000E376A7A8`.\
+Why do we access `$pHero` structure at `0x10` offset? Because each userdata has it's own type, and you can print this type with `tostring` (CA implementation).\
+For example:
+| Code | Output | Comment |
+|---|---|---|
+|`tostring(core.ui_root)`				| `UIComponent (000000006BCEE520)` | |
+|`tostring(character)`				| `CHARACTER_SCRIPT_INTERFACE (0000000049376488)` | CA userdata (points to `00000000496D8E70` - `$pHero`) |
+|`tostring(ud_topointer(character))`	| `userdata: 00000001E6F81AE8` | where memreader userdata is located at (points to `0000000049376488`) |
+|`mr.tostring(ud_topointer(character))`	| `0000000049376488`| where CA userdata is located at |
+|`tostring(get_chptr(character))`		| `userdata: 00000001F1FFCD98` | where memreader userdata is located at (points to `00000000496D8E70`) |
+|`mr.tostring(get_chptr(character))`	| `00000000496D8E70` | where `$pHero` structure is located at |
+
 How does CA differentiate dynamic structure that external libraries (such as `memreader`) create?\
-Well, in most cases, they allocate 2/3 pointers of data. They look at first 1/2 pointers (which can be a little bit unsafe, as they have no idea of the size of userdata, unless they go really deep into the rabbit hole of lua source) and based on the values of these first pointers they can determine, whether it is CA userdata or external userdata.\
-Those pointers point to some static data, it doesn't matter what it contains. The actual pointer to `character` or other entity of your interest can be found at `0x08` or `0x10` offset. But don't take my word for it. In the example above, you would go to `0000000062BBC3C8` address, and look at the data yourself. Best print and check several different of such userdata structures, to be completely sure. In `Reclass.net` you would look for `<HEAP>00000000E376A7A8` pointer. Don't bother with `<DATA>Warhammer2.exe.14...` pointers.
+In `C` there is such thing as `type_info` which can be read with `typeid`, can be found inside `vtable`. But I'm not sure why a lot of CA userdata structures have an extra pointer, that looks just like `vtable`, right next to `vtable` pointer. I think they use different approach, as implementation of `typeid` expects to receive entity with `vtable` inside (which we cannot assume for external userdata).\
+Anyway, there are 2/3 pointers in userdata. The actual pointer to `character` or other entity of your interest can be found at `0x08` or `0x10` offset. But don't take my word for it. In the example above, you would go to `0000000049376488` address, and look at the data yourself. Best print and check several different of such userdata structures, to be completely sure. In `Reclass.net` you would look for `<HEAP>00000000496D8E70` pointer. Don't bother with `<DATA>Warhammer2.exe.14...` pointers.
