@@ -34,14 +34,14 @@ local size, pdata = mr.read_array(ptr, 0x50)
 -- preallocate table with narr=size (raw array part), nrec=0 (hash part)
 local entries = mr.createtable(size, 0)
 for i = 1, size do
-	-- advanced use-case example: 
-	-- trait_categories__base = pointer to first entry. each entry has size 32.
-	-- let's say you copy all this data into table tcdata = { first_entry, ... }
-	-- pdata+0x00 points to one of such entries.
-	-- read_rowidx returns idx of that entry (tcdata[ idx ]).
-	local idx = read_rowidx(pdata, 0x00, trait_categories__base, 32) -- sizeof(trait_categories)
-	local entry = tcdata[ idx ]
-	pdata = mr.add(pdata, 0x08) -- sizeof(LPVOID)
+    -- advanced use-case example: 
+    -- trait_categories__base = pointer to first entry. each entry has size 32.
+    -- let's say you copy all this data into table tcdata = { first_entry, ... }
+    -- pdata+0x00 points to one of such entries.
+    -- read_rowidx returns idx of that entry (tcdata[ idx ]).
+    local idx = read_rowidx(pdata, 0x00, trait_categories__base, 32) -- sizeof(trait_categories)
+    local entry = tcdata[ idx ]
+    pdata = mr.add(pdata, 0x08) -- sizeof(LPVOID)
 end
 
 -- probably you won't need this functionality at all
@@ -274,7 +274,7 @@ core:add_listener(
     'UICreated',
     true,
     function(context)
-	root = core.ui_root
+        root = core.ui_root
         local ptr = mr.base
         ptr = read_pointer(ptr, '\152\31\96\3') -- 0x03601F98
         ptr = read_pointer(ptr, 0x20)
@@ -308,40 +308,40 @@ local function loadAvailablePoints(chptr)
     return read_int32(chptr, 0x0610)
 end
 local function FetchSelectedCharacter()
-	local CA_cip = root:SequentialFind(
-			'layout',
-			'info_panel_holder',
-			'primary_info_panel_holder',
-			'info_panel_background',
-			'CharacterInfoPopup')
-	local ptr = ud_topointer(CA_cip)
-	ptr = read_pointer(ptr, 0x00) -- $uic
-	ptr = read_pointer(ptr, 0x50) -- cco_selected
-	if eq(ptr, '\0\0\0\0\0\0\0\0') then return end -- should never happen
-	ptr = read_pointer(ptr, 0x08) -- $pHero.details
-	ptr = read_pointer(ptr, 0x00) -- $pHero
-	local cqi = read_int32(ptr, 0xF0)
-	local character = model:character_for_command_queue_index(cqi)
-	local member = character:family_member()
-	local static_cqi = member:command_queue_index()
-	return character, cqi, static_cqi
+    local CA_cip = root:SequentialFind(
+        'layout',
+        'info_panel_holder',
+        'primary_info_panel_holder',
+        'info_panel_background',
+        'CharacterInfoPopup')
+    local ptr = ud_topointer(CA_cip)
+    ptr = read_pointer(ptr, 0x00) -- $uic
+    ptr = read_pointer(ptr, 0x50) -- cco_selected
+    if eq(ptr, '\0\0\0\0\0\0\0\0') then return end -- should never happen
+    ptr = read_pointer(ptr, 0x08) -- $pHero.details
+    ptr = read_pointer(ptr, 0x00) -- $pHero
+    local cqi = read_int32(ptr, 0xF0)
+    local character = model:character_for_command_queue_index(cqi)
+    local member = character:family_member()
+    local static_cqi = member:command_queue_index()
+    return character, cqi, static_cqi
 end
 core:add_listener(
-	'',
-	'CharacterSelected',
-	true,
-	function(context)
-		local character, cqi, static_cqi = FetchSelectedCharacter()
-		if not character then return end
-		LoadData()
-		local subtype_key = character:character_subtype_key()
-		if tbl_forbidden_subtypes[ subtype_key ] then return end
-		local chptr = get_chptr(character)
-		local available_points = loadAvailablePoints(chptr)
-		if available_points == 0 then return end
-		-- do stuff
-	end,
-	true)
+    '',
+    'CharacterSelected',
+    true,
+    function(context)
+        local character, cqi, static_cqi = FetchSelectedCharacter()
+        if not character then return end
+        LoadData()
+        local subtype_key = character:character_subtype_key()
+        if tbl_forbidden_subtypes[ subtype_key ] then return end
+        local chptr = get_chptr(character)
+        local available_points = loadAvailablePoints(chptr)
+        if available_points == 0 then return end
+        -- do stuff
+    end,
+    true)
 ```
 
 # Understanding Userdata

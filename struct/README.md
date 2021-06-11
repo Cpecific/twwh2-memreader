@@ -21,21 +21,21 @@ If you are going to decode memory structures, then you should learn to immediate
 ```h
 // @string, @unicode
 struct CA_String {
-	union {
-		DEFINE_MEMBER_N(int32, length, 0x00);
-		DEFINE_MEMBER_N(int32, capacity, 0x04);
-		DEFINE_MEMBER_N(char*, data, 0x08);
-	}
+    union {
+        DEFINE_MEMBER_N(int32, length, 0x00);
+        DEFINE_MEMBER_N(int32, capacity, 0x04);
+        DEFINE_MEMBER_N(char*, data, 0x08);
+    }
 }
 ```
 ### Arrays
 ```h
 struct CA_Array<T> {
-	union {
-		DEFINE_MEMBER_N(int32, capacity, 0x00);
-		DEFINE_MEMBER_N(int32, length, 0x04);
-		DEFINE_MEMBER_N(T*, data, 0x08);
-	}
+    union {
+        DEFINE_MEMBER_N(int32, capacity, 0x00);
+        DEFINE_MEMBER_N(int32, length, 0x04);
+        DEFINE_MEMBER_N(T*, data, 0x08);
+    }
 }
 ```
 ### Linked list
@@ -50,33 +50,33 @@ If you are inside `CA_Member<T>` and want to find you where the fuck is `CA_List
 ```c++
 CA_Member<T> *cur, *list;
 while (true) {
-	list = cur->next;
-	// because you treat every entry as `CA_Member<T>`,
-	// and when your `next` points to `CA_List<T>`,
-	// you will actually read `CA_List<T>.prev`.
-	if (list->next == cur) { return (CA_List<T>*)list; }
-	cur = list;
+    list = cur->next;
+    // because you treat every entry as `CA_Member<T>`,
+    // and when your `next` points to `CA_List<T>`,
+    // you will actually read `CA_List<T>.prev`.
+    if (list->next == cur) { return (CA_List<T>*)list; }
+    cur = list;
 }
 ```
 ```h
 struct CA_Member<T> {
-	union {
-		DEFINE_MEMBER_N(CA_Member<T>*, prev, 0x00);
-		DEFINE_MEMBER_N(CA_Member<T>*, next, 0x08);
-		DEFINE_MEMBER_N(T, data, 0x10);
-	}
+    union {
+        DEFINE_MEMBER_N(CA_Member<T>*, prev, 0x00);
+        DEFINE_MEMBER_N(CA_Member<T>*, next, 0x08);
+        DEFINE_MEMBER_N(T, data, 0x10);
+    }
 }
 // sizeof = 0x30 = 48
 struct CA_List<T> {
-	union {
-		DEFINE_MEMBER_N(int32, actual_size, 0x00);
-		DEFINE_MEMBER_N(CA_Member<T>*, prev, 0x08); // tail
-		DEFINE_MEMBER_N(CA_Member<T>*, next, 0x10); // head
-		DEFINE_MEMBER_N(int32, capacity, 0x18);
-		DEFINE_MEMBER_N(int32, size, 0x1C);
-		DEFINE_MEMBER_N(CA_Member<T>**, hash, 0x20);
-		DEFINE_MEMBER_N(float, some_number, 0x28); // I've only seen value 1.0
-	}
+    union {
+        DEFINE_MEMBER_N(int32, actual_size, 0x00);
+        DEFINE_MEMBER_N(CA_Member<T>*, prev, 0x08); // tail
+        DEFINE_MEMBER_N(CA_Member<T>*, next, 0x10); // head
+        DEFINE_MEMBER_N(int32, capacity, 0x18);
+        DEFINE_MEMBER_N(int32, size, 0x1C);
+        DEFINE_MEMBER_N(CA_Member<T>**, hash, 0x20);
+        DEFINE_MEMBER_N(float, some_number, 0x28); // I've only seen value 1.0
+    }
 }
 ```
 
@@ -93,12 +93,12 @@ const uic_db = require('@static/uic_db')
 let ptr = b.read_pointer(b.base, 0x03601F40) // @static/uic_db.base
 let uic_db_entry = b.read_instance(undefined, ptr, 0x00, uic_db.static_uic_db)
 for (const entry of uic_db_entry.uic_list.data()) { // uic_list: 0x50; prev: 0x08
-	// prev(0): idx = 0
-	if (entry.uic_path === 'ui\\common ui\\tab_completer') {
-		let ptr = entry.uic._pointer // @uic.UIC: 0x20
-		ptr = b.read_pointer(ptr, 0x10) // @db.DB_TABLE
-		break;
-	}
+    // prev(0): idx = 0
+    if (entry.uic_path === 'ui\\common ui\\tab_completer') {
+        let ptr = entry.uic._pointer // @uic.UIC: 0x20
+        ptr = b.read_pointer(ptr, 0x10) // @db.DB_TABLE
+        break;
+    }
 }
 ```
 #### LUA
@@ -125,27 +125,27 @@ const { UIC } = require('@uic')
 let ptr = b.base + 0x03737E00
 let arr = b.read_array(undefined, ptr, 0x00, wrapPtr(UIC))
 for (let uic of arr.data()) { // items[]: 0x08
-	uic = uic.data
-	// 0x18: idx = 4
-	if (uic.name === 'war_coordination_buttonset') {
-		let ptr = uic._pointer
-		ptr = b.read_pointer(ptr, 0x50) // UIC.cco_selected? => $uic__cco_selected?
-		ptr = b.read_pointer(ptr, 0x08) // @character.CharacterDetails
-		ptr = b.read_pointer(ptr, 0x00) // @character.Character
-		let cqi = b.read_int32(ptr, 0xF0)
-		break;
-	}
+    uic = uic.data
+    // 0x18: idx = 4
+    if (uic.name === 'war_coordination_buttonset') {
+        let ptr = uic._pointer
+        ptr = b.read_pointer(ptr, 0x50) // UIC.cco_selected? => $uic__cco_selected?
+        ptr = b.read_pointer(ptr, 0x08) // @character.CharacterDetails
+        ptr = b.read_pointer(ptr, 0x00) // @character.Character
+        let cqi = b.read_int32(ptr, 0xF0)
+        break;
+    }
 }
 ```
 #### LUA
 ```lua
 -- Does it already exist in UICreated? Does it get recreated at some conditions?
 local CA_cip = root:SequentialFind(
-	'layout',
-	'info_panel_holder',
-	'primary_info_panel_holder',
-	'info_panel_background',
-	'CharacterInfoPopup')
+    'layout',
+    'info_panel_holder',
+    'primary_info_panel_holder',
+    'info_panel_background',
+    'CharacterInfoPopup')
 local ptr = ud_topointer(CA_cip)
 ptr = read_pointer(ptr, 0x00) -- @uic.UIC
 ptr = read_pointer(ptr, 0x50) -- cco_selected
