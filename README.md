@@ -352,12 +352,12 @@ local function get_chptr(character) return read_pointer(ud_topointer(character),
 Why do we access `$pHero` structure at `0x10` offset? Because each userdata has it's own type, and you can print this type with `tostring` (CA implementation).\
 For example:
 ```lua
-tostring(core.ui_root) 				 'UIComponent (000000006BCEE520)'
-tostring(character) 				 'CHARACTER_SCRIPT_INTERFACE (0000000049376488)' -- CA userdata (points to `00000000496D8E70` - `$pHero`)
-tostring(ud_topointer(character))	 'userdata: 00000001E6F81AE8'	-- where memreader userdata is located at (points to `0000000049376488`)
-mr.tostring(ud_topointer(character)) '0000000049376488'				-- where CA userdata is located at
-tostring(get_chptr(character))		 'userdata: 00000001F1FFCD98'	-- where memreader userdata is located at (points to `00000000496D8E70`)
-mr.tostring(get_chptr(character))	 '00000000496D8E70'				-- where `$pHero` structure is located at
+tostring(core.ui_root)               'UIComponent (000000006BCEE520)'
+tostring(character)                  'CHARACTER_SCRIPT_INTERFACE (0000000049376488)' -- CA userdata (points to `00000000496D8E70` - `$pHero`)
+tostring(ud_topointer(character))    'userdata: 00000001E6F81AE8'   -- where memreader userdata is located at (points to `0000000049376488`)
+mr.tostring(ud_topointer(character)) '0000000049376488'             -- where CA userdata is located at
+tostring(get_chptr(character))       'userdata: 00000001F1FFCD98'   -- where memreader userdata is located at (points to `00000000496D8E70`)
+mr.tostring(get_chptr(character))    '00000000496D8E70'             -- where `$pHero` structure is located at
 ```
 How does CA differentiate dynamic structure that external libraries (such as `memreader`) create?\
 In `C` there is such thing as `type_info` which can be read with `typeid`, can be found inside `vtable`. But I'm not sure why a lot of CA userdata structures have an extra pointer, that looks just like `vtable`, right next to `vtable` pointer. I think they use different approach, as implementation of `typeid` expects to receive entity with `vtable` inside (which we cannot assume for external userdata).\
