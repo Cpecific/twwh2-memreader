@@ -41,29 +41,40 @@ struct CA_Array<T> {
 ### Linked list
 This suckers have hash part. CA uses this all over da place.\
 You really need to recognise these structures at first glance, otherwise you will waste too much time following pointers.\
-`head->prev == nullptr`, `tail->next == CA_Shit_List<T>` (be careful, when traversing with scripts).\
-If `actual_size == 0`, then `head == tail == CA_Shit_List<T>; capacity == size == 2`.\
+`head->prev == nullptr`, `tail->next == CA_List<T>` (be careful, when traversing with scripts).\
+If `actual_size == 0`, then `head == tail == CA_List<T>; capacity == size == 2`.\
 Size of `hash` part is always power of 2.\
-It is easy to recognise if you are inside of `hash` part. You will see continious array of points, and some of these pointers will be repeated (consequtively). And, of course, you would need to look whether it's items are of `CA_Shit_Member<T>` type.\
+It is easy to recognise if you are inside of `hash` part. You will see continious array of pointers, and some of these pointers will be repeated (consequtively). And, of course, you would need to look whether it's items are of `CA_Member<T>` type.\
 If you want to iterate over linked list, you should go from `tail` to the `head`. `head` always has `prev == nullptr`.\
-If you are inside `CA_Shit_Member<T>` and want to find you where the fuck is `CA_Shit_List<T>`, follow `next`, it will bring you to `CA_Shit_List<T>`. Simple condition `if (cur->next.prev != cur) { found the sucker }`.
+If you are inside `CA_Member<T>` and want to find you where the fuck is `CA_List<T>`, follow `next`, it will bring you to `CA_List<T>`.
+```c++
+CA_Member<T> *cur, *list;
+while (true) {
+	list = cur->next;
+	// because you treat every entry as `CA_Member<T>`,
+	// and when your `next` points to `CA_List<T>`,
+	// you will actually read `CA_List<T>.prev`.
+	if (list->next == cur) { return (CA_List<T>*)list; }
+	cur = list;
+}
+```
 ```h
-struct CA_Shit_Member<T> {
+struct CA_Member<T> {
 	union {
-		DEFINE_MEMBER_N(CA_Shit_Member<T>*, prev, 0x00);
-		DEFINE_MEMBER_N(CA_Shit_Member<T>*, next, 0x08);
+		DEFINE_MEMBER_N(CA_Member<T>*, prev, 0x00);
+		DEFINE_MEMBER_N(CA_Member<T>*, next, 0x08);
 		DEFINE_MEMBER_N(T, data, 0x10);
 	}
 }
 // sizeof = 0x30 = 48
-struct CA_Shit_List<T> {
+struct CA_List<T> {
 	union {
 		DEFINE_MEMBER_N(int32, actual_size, 0x00);
-		DEFINE_MEMBER_N(CA_Shit_Member<T>*, prev, 0x08); // tail
-		DEFINE_MEMBER_N(CA_Shit_Member<T>*, next, 0x10); // head
+		DEFINE_MEMBER_N(CA_Member<T>*, prev, 0x08); // tail
+		DEFINE_MEMBER_N(CA_Member<T>*, next, 0x10); // head
 		DEFINE_MEMBER_N(int32, capacity, 0x18);
 		DEFINE_MEMBER_N(int32, size, 0x1C);
-		DEFINE_MEMBER_N(CA_Shit_Member<T>**, hash, 0x20);
+		DEFINE_MEMBER_N(CA_Member<T>**, hash, 0x20);
 		DEFINE_MEMBER_N(float, some_number, 0x28); // I've only seen value 1.0
 	}
 }
@@ -93,7 +104,7 @@ for (const entry of uic_db_entry.uic_list.data()) { // uic_list: 0x50; prev: 0x0
 #### LUA
 ```lua
 -- UICreated @event
--- Could also find where this `tab_completer` hides among root children
+-- Could also find where this `tab_completer` hides among root children?
 local ptr = mr.base
 ptr = read_pointer(ptr, '\152\31\96\3') -- 0x03601F98
 ptr = read_pointer(ptr, 0x20)
@@ -103,7 +114,7 @@ ptr = read_pointer(ptr, 0x10)
 ### Current selected character (+hover)
 ```js
 // There are several other UICs that point to current character.
-// Some of the point to actual selected character (not hover).
+// Some of them point to actual selected character (not hover).
 // Would be pain in the ass to track them with pointer scan (did it, not fun).
 // Better to programmatically do it with js over all children of root.
 // [[[[[<Warhammer2.exe>+03737E08]+18]+50]+08]]
@@ -151,8 +162,8 @@ local cqi = read_int32(ptr, 0xF0)
 0x08: bonus_value_id(16 bits)
 0x0A: ebv_table_id(8 bits)
 0x0B: ???(40 bits)
-0x10: union // treated dynamically based in ebv_table_id
-// In most cases it is the same value, that parent entity' `value`.
+0x10: entry pointer // (union) treated dynamically based on ebv_table_id
+// In most cases it is the same value as parent entity `value`.
 // (ex: character_trait_level__effects has `value` field, and `ebv.value == value`)
 // But I've seen one case where they are not the same. Not sure why
 0x18: value(float)
