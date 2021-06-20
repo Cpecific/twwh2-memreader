@@ -84,7 +84,7 @@ And would have to resort to a more "ugly" approach:
 local ptr = add(base, 32 * idx)
 local diff = sub(ptr, base)
 ```
-Why no Linux or Mac support?\
+**Why no Linux or Mac support?**\
 On Linux Lua was not configured with `LUA_DL_DLOPEN` enabled, therefore, `package.loadlib` and `require(cpath)` do not work.\
 `io.popen` doesn't work as well (didn't check `os.execute`).\
 On Mac any `file:write` functionality is broken (disabled?).\
@@ -203,7 +203,6 @@ Reads `bytes` from memory. String contains raw data. It is not null terminated.
 #### `write(pointer, [offset], string)`
 #### `write(pointer, [offset], pointer)`
 #### `write(pointer, [offset], uint8..int32)`
-Write functionality hasn't been tested yet.
 
 
 ## Modules

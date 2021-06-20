@@ -9,9 +9,10 @@ int push_error(lua_State *L, const char *msg)
 	return 2;
 }
 
-int push_last_error(lua_State *L)
+int push_last_error(lua_State *L, const char *msg)
 {
-	return push_error(L, "failed to read memory");
+	return luaL_error(L, msg);
+	// return push_error(L, "failed to read memory");
 	// static char err[256];
 	// int strLen = FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
 	// 							NULL,

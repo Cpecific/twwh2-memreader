@@ -45,14 +45,14 @@ You really need to recognise these structures at first glance, otherwise you wil
 If `actual_size == 0`, then `head == tail == CA_List<T>; capacity == size == 2`.\
 Size of `hash` part is always power of 2.\
 It is easy to recognise if you are inside of `hash` part. You will see continious array of pointers, and some of these pointers will be repeated (consequtively). And, of course, you would need to look whether it's items are of `CA_Member<T>` type.\
-If you want to iterate over linked list, you should go from `tail` to the `head`. `head` always has `prev == nullptr`.\
+If you want to iterate over linked list, you should go from `tail` to the `head`. `head` always has `head->prev == nullptr`.\
 If you are inside `CA_Member<T>` and want to find you where the fuck is `CA_List<T>`, follow `next`, it will bring you to `CA_List<T>`.
 ```c++
 CA_Member<T> *cur, *list;
 while (true) {
     list = cur->next;
     // because you treat every entry as `CA_Member<T>`,
-    // and when your `next` points to `CA_List<T>`,
+    // when your `list` points to `CA_List<T>`,
     // you will actually read `CA_List<T>.prev`.
     if (list->next == cur) { return (CA_List<T>*)list; }
     cur = list;

@@ -7,7 +7,7 @@ local _WIN32 = (_SEP == '\\')
 -- assert(_WIN32)
 -- assert(_LINUX)
 
-local APP_VERSION = 1.0
+local APP_VERSION = 1.1
 local platform = 'Windows_NT-x64'
 -- if _WIN32 then platform = 'Windows_NT-x64'
 -- elseif _LINUX then platform = 'linux-x64' end

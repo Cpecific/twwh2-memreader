@@ -116,6 +116,8 @@ int register_snapshot(lua_State *L)
 }
 
 static const char *p_typeError = "passed invalid argument type";
+static const char *p_readError = "failed to read memory";
+static const char *p_writeError = "failed to write memory";
 static char read_buffer[1024];
 int l_read_float(lua_State *L)
 {
@@ -126,7 +128,7 @@ int l_read_float(lua_State *L)
 	lua_Number tmp;
 	BOOL success = ReadProcessMemory(handle, address + offset, &tmp, sizeof(lua_Number), NULL);
 	if (!success)
-		return push_last_error(L);
+		return push_last_error(L, p_readError);
 	lua_pushnumber(L, tmp);
 	return 1;
 }
@@ -140,7 +142,7 @@ int l_read_pointer(lua_State *L)
 	lmr_Value *u = lmr_push_userdata(L, LUA_TPOINTER);
 	BOOL success = ReadProcessMemory(handle, address, &u->p, sizeof(LPVOID), NULL);
 	if (!success)
-		return push_last_error(L);
+		return push_last_error(L, p_readError);
 	return 1;
 }
 BOOL read_some_number(lua_State *L, SIZE_T size)
@@ -154,7 +156,7 @@ BOOL read_some_number(lua_State *L, SIZE_T size)
 int l_read_uint8(lua_State *L)
 {
 	if (!read_some_number(L, sizeof(UINT8)))
-		return push_last_error(L);
+		return push_last_error(L, p_readError);
 
 	BOOL toUserdata = lmr_to_boolean(L, L->base + 2);
 	UINT8 value = *((UINT8 *)read_buffer);
@@ -167,7 +169,7 @@ int l_read_uint8(lua_State *L)
 int l_read_int8(lua_State *L)
 {
 	if (!read_some_number(L, sizeof(INT8)))
-		return push_last_error(L);
+		return push_last_error(L, p_readError);
 
 	BOOL toUserdata = lmr_to_boolean(L, L->base + 2);
 	INT8 value = *((INT8 *)read_buffer);
@@ -180,7 +182,7 @@ int l_read_int8(lua_State *L)
 int l_read_uint16(lua_State *L)
 {
 	if (!read_some_number(L, sizeof(UINT16)))
-		return push_last_error(L);
+		return push_last_error(L, p_readError);
 
 	BOOL toUserdata = lmr_to_boolean(L, L->base + 2);
 	UINT16 value = *((UINT16 *)read_buffer);
@@ -193,7 +195,7 @@ int l_read_uint16(lua_State *L)
 int l_read_int16(lua_State *L)
 {
 	if (!read_some_number(L, sizeof(INT16)))
-		return push_last_error(L);
+		return push_last_error(L, p_readError);
 
 	BOOL toUserdata = lmr_to_boolean(L, L->base + 2);
 	INT16 value = *((INT16 *)read_buffer);
@@ -206,7 +208,7 @@ int l_read_int16(lua_State *L)
 int l_read_uint32(lua_State *L)
 {
 	if (!read_some_number(L, sizeof(UINT32)))
-		return push_last_error(L);
+		return push_last_error(L, p_readError);
 
 	BOOL toUserdata = lmr_to_boolean(L, L->base + 2);
 	UINT32 value = *((UINT32 *)read_buffer);
@@ -219,7 +221,7 @@ int l_read_uint32(lua_State *L)
 int l_read_int32(lua_State *L)
 {
 	if (!read_some_number(L, sizeof(INT32)))
-		return push_last_error(L);
+		return push_last_error(L, p_readError);
 
 	BOOL toUserdata = lmr_to_boolean(L, L->base + 2);
 	INT32 value = *((INT32 *)read_buffer);
@@ -239,7 +241,7 @@ int l_read_boolean(lua_State *L)
 	BYTE b;
 	BOOL success = ReadProcessMemory(handle, address + offset, &b, sizeof(BYTE), NULL);
 	if (!success)
-		return push_last_error(L);
+		return push_last_error(L, p_readError);
 
 	lua_pushboolean(L, b == 0 ? 0 : 1);
 	return 1;
@@ -258,13 +260,13 @@ int l_read_string(lua_State *L)
 	{
 		success = ReadProcessMemory(handle, address, &address, sizeof(LPVOID), NULL);
 		if (!success)
-			return push_last_error(L);
+			return push_last_error(L, p_readError);
 	}
 
 	INT32 length;
 	success = ReadProcessMemory(handle, address, &length, sizeof(INT32), NULL);
 	if (!success)
-		return push_last_error(L);
+		return push_last_error(L, p_readError);
 
 	if (length <= 0)
 	{
@@ -273,7 +275,7 @@ int l_read_string(lua_State *L)
 	}
 	success = ReadProcessMemory(handle, address + 0x08, &address, sizeof(LPVOID), NULL);
 	if (!success)
-		return push_last_error(L);
+		return push_last_error(L, p_readError);
 
 	if (isWide)
 		length *= 2;
@@ -289,7 +291,7 @@ int l_read_string(lua_State *L)
 	{
 		if (p != read_buffer)
 			free(p);
-		return push_last_error(L);
+		return push_last_error(L, p_readError);
 	}
 
 	lua_pushlstring(L, p, length);
@@ -310,7 +312,7 @@ int l_read_array(lua_State *L)
 	INT32 size;
 	success = ReadProcessMemory(handle, address + 0x04, &size, sizeof(INT32), NULL);
 	if (!success)
-		return push_last_error(L);
+		return push_last_error(L, p_readError);
 
 	if (toUserdata)
 		lmr_push_userdata(L, LUA_TINT32)->int32 = size;
@@ -324,7 +326,7 @@ int l_read_array(lua_State *L)
 	}
 	success = ReadProcessMemory(handle, address + 0x08, &uptr->p, sizeof(LPVOID), NULL);
 	if (!success)
-		return push_last_error(L);
+		return push_last_error(L, p_readError);
 
 	return 2;
 }
@@ -339,7 +341,7 @@ int l_read_rowidx(lua_State *L)
 	HANDLE handle = GetCurrentProcess();
 	BOOL success = ReadProcessMemory(handle, address, &address, sizeof(LPVOID), NULL);
 	if (!success)
-		return push_last_error(L);
+		return push_last_error(L, p_readError);
 
 	ptrdiff_t diff = address - base;
 	diff /= row_size;
@@ -372,7 +374,7 @@ int l_read(lua_State *L)
 	{
 		if (p != read_buffer)
 			free(p);
-		return push_last_error(L);
+		return push_last_error(L, p_readError);
 	}
 
 	lua_pushlstring(L, p, numBytesRead);
@@ -395,33 +397,37 @@ int l_write(lua_State *L)
 	{
 	case LUA_TBOOLEAN:
 		if (!WriteProcessMemory(handle, address, &o->value.b, sizeof(BOOL), NULL))
-			return push_last_error(L);
+			return push_last_error(L, p_writeError);
 	case LUA_TNUMBER:
 		if (!WriteProcessMemory(handle, address, &o->value.n, sizeof(lua_Number), NULL))
-			return push_last_error(L);
+			return push_last_error(L, p_writeError);
 	case LUA_TSTRING:
 		if (!WriteProcessMemory(handle, address, svalue(o), tsvalue(o)->len, NULL))
-			return push_last_error(L);
+			return push_last_error(L, p_writeError);
 	case LUA_TUSERDATA:
 		u = get_udata(o);
 		switch (u->tt)
 		{
 		case LUA_TPOINTER:
 			size = sizeof(LPVOID);
+			break;
 		case LUA_TUINT8:
 		case LUA_TINT8:
 			size = sizeof(UINT8);
+			break;
 		case LUA_TUINT16:
 		case LUA_TINT16:
 			size = sizeof(UINT16);
+			break;
 		case LUA_TUINT32:
 		case LUA_TINT32:
 			size = sizeof(UINT32);
+			break;
 		default:
 			return luaL_error(L, p_typeError);
 		}
 		if (!WriteProcessMemory(handle, address, &u->uint32, size, NULL))
-			return push_last_error(L);
+			return push_last_error(L, p_writeError);
 	}
 	return 0;
 }
@@ -466,7 +472,7 @@ int l_modules(lua_State *L)
 	if (*handlePtr == INVALID_HANDLE_VALUE)
 	{
 		// luaL_error(L, "Failed to create snapshot");
-		return push_last_error(L);
+		return push_last_error(L, "failed to create snapshot");
 	}
 
 	// process_modules_iterator's upvalue is the HANDLE* userdata
