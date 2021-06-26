@@ -76,7 +76,7 @@ typedef struct
 	union
 	{
 		// char *p;
-		intptr_t p;
+		INT_PTR p;
 		UINT8 uint8;
 		INT8 int8;
 		UINT16 uint16;

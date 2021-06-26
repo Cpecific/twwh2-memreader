@@ -1,6 +1,6 @@
 ﻿cmake_minimum_required (VERSION 3.8)
 
-project ("twwh2_memreader" VERSION 1.1)
+project ("twwh2_memreader" VERSION 1.2)
 
 add_library(twwh2_memreader SHARED
 	"stdafx.h"

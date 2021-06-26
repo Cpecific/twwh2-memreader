@@ -25,11 +25,11 @@ lmr_Value *lmr_push_userdata(lua_State *L, BYTE tt)
 	p_udata->tt = tt;
 	return p_udata;
 }
-LPVOID lmr_string_to_pointer(const TValue *o)
+INT_PTR lmr_string_to_pointer(const TValue *o)
 {
 	const char *p = svalue(o);
 	// if (sizeof(LPVOID) == 8)
-	return *(UINT64 *)p;
+	return *(INT_PTR *)p;
 	// else
 	// 	return *(UINT32 *)p;
 }
@@ -38,7 +38,7 @@ UINT32 lmr_string_to_uint32(const TValue *o)
 	const char *p = svalue(o);
 	return *(UINT32 *)p;
 }
-LPVOID lmr_to_pointer(lua_State *L, const TValue *o)
+INT_PTR lmr_to_pointer(lua_State *L, const TValue *o)
 {
 	lmr_Value *u;
 	switch (o->tt)
@@ -121,12 +121,12 @@ static const char *p_writeError = "failed to write memory";
 static char read_buffer[1024];
 int l_read_float(lua_State *L)
 {
-	char *address = lmr_to_pointer(L, L->base);
+	INT_PTR address = lmr_to_pointer(L, L->base);
 	SIZE_T offset = lmr_to_size_t(L, L->base + 1);
 
 	HANDLE handle = GetCurrentProcess();
 	lua_Number tmp;
-	BOOL success = ReadProcessMemory(handle, address + offset, &tmp, sizeof(lua_Number), NULL);
+	BOOL success = ReadProcessMemory(handle, (LPCVOID)(address + offset), &tmp, sizeof(lua_Number), NULL);
 	if (!success)
 		return push_last_error(L, p_readError);
 	lua_pushnumber(L, tmp);
@@ -134,24 +134,23 @@ int l_read_float(lua_State *L)
 }
 int l_read_pointer(lua_State *L)
 {
-	char *address = lmr_to_pointer(L, L->base);
+	INT_PTR address = lmr_to_pointer(L, L->base);
 	SIZE_T offset = lmr_to_size_t(L, L->base + 1);
-	address += offset;
 
 	HANDLE handle = GetCurrentProcess(); // no need to close
 	lmr_Value *u = lmr_push_userdata(L, LUA_TPOINTER);
-	BOOL success = ReadProcessMemory(handle, address, &u->p, sizeof(LPVOID), NULL);
+	BOOL success = ReadProcessMemory(handle, (LPCVOID)(address + offset), &u->p, sizeof(INT_PTR), NULL);
 	if (!success)
 		return push_last_error(L, p_readError);
 	return 1;
 }
 BOOL read_some_number(lua_State *L, SIZE_T size)
 {
-	char *address = lmr_to_pointer(L, L->base);
+	INT_PTR address = lmr_to_pointer(L, L->base);
 	SIZE_T offset = lmr_to_size_t(L, L->base + 1);
 
 	HANDLE handle = GetCurrentProcess();
-	return ReadProcessMemory(handle, address + offset, read_buffer, size, NULL);
+	return ReadProcessMemory(handle, (LPCVOID)(address + offset), read_buffer, size, NULL);
 }
 int l_read_uint8(lua_State *L)
 {
@@ -234,12 +233,12 @@ int l_read_int32(lua_State *L)
 
 int l_read_boolean(lua_State *L)
 {
-	char *address = lmr_to_pointer(L, L->base);
+	INT_PTR address = lmr_to_pointer(L, L->base);
 	SIZE_T offset = lmr_to_size_t(L, L->base + 1);
 
 	HANDLE handle = GetCurrentProcess();
 	BYTE b;
-	BOOL success = ReadProcessMemory(handle, address + offset, &b, sizeof(BYTE), NULL);
+	BOOL success = ReadProcessMemory(handle, (LPCVOID)(address + offset), &b, sizeof(BYTE), NULL);
 	if (!success)
 		return push_last_error(L, p_readError);
 
@@ -248,7 +247,7 @@ int l_read_boolean(lua_State *L)
 }
 int l_read_string(lua_State *L)
 {
-	char *address = lmr_to_pointer(L, L->base);
+	INT_PTR address = lmr_to_pointer(L, L->base);
 	SIZE_T offset = lmr_to_size_t(L, L->base + 1);
 	address += offset;
 	BOOL isPtr = lmr_to_boolean(L, L->base + 2);
@@ -258,13 +257,13 @@ int l_read_string(lua_State *L)
 	HANDLE handle = GetCurrentProcess();
 	if (isPtr)
 	{
-		success = ReadProcessMemory(handle, address, &address, sizeof(LPVOID), NULL);
+		success = ReadProcessMemory(handle, (LPCVOID)address, &address, sizeof(INT_PTR), NULL);
 		if (!success)
 			return push_last_error(L, p_readError);
 	}
 
 	INT32 length;
-	success = ReadProcessMemory(handle, address, &length, sizeof(INT32), NULL);
+	success = ReadProcessMemory(handle, (LPCVOID)address, &length, sizeof(INT32), NULL);
 	if (!success)
 		return push_last_error(L, p_readError);
 
@@ -273,7 +272,7 @@ int l_read_string(lua_State *L)
 		lua_pushliteral(L, "");
 		return 1;
 	}
-	success = ReadProcessMemory(handle, address + 0x08, &address, sizeof(LPVOID), NULL);
+	success = ReadProcessMemory(handle, (LPCVOID)(address + 0x08), &address, sizeof(INT_PTR), NULL);
 	if (!success)
 		return push_last_error(L, p_readError);
 
@@ -286,7 +285,7 @@ int l_read_string(lua_State *L)
 	else
 		p = malloc(length);
 
-	success = ReadProcessMemory(handle, address, p, length, NULL);
+	success = ReadProcessMemory(handle, (LPCVOID)address, p, length, NULL);
 	if (!success)
 	{
 		if (p != read_buffer)
@@ -301,7 +300,7 @@ int l_read_string(lua_State *L)
 }
 int l_read_array(lua_State *L)
 {
-	char *address = lmr_to_pointer(L, L->base);
+	INT_PTR address = lmr_to_pointer(L, L->base);
 	SIZE_T offset = lmr_to_size_t(L, L->base + 1);
 	address += offset;
 	BOOL toUserdata = lmr_to_boolean(L, L->base + 2);
@@ -310,7 +309,7 @@ int l_read_array(lua_State *L)
 	HANDLE handle = GetCurrentProcess();
 
 	INT32 size;
-	success = ReadProcessMemory(handle, address + 0x04, &size, sizeof(INT32), NULL);
+	success = ReadProcessMemory(handle, (LPCVOID)(address + 0x04), &size, sizeof(INT32), NULL);
 	if (!success)
 		return push_last_error(L, p_readError);
 
@@ -324,7 +323,7 @@ int l_read_array(lua_State *L)
 		uptr->p = NULL;
 		return 2;
 	}
-	success = ReadProcessMemory(handle, address + 0x08, &uptr->p, sizeof(LPVOID), NULL);
+	success = ReadProcessMemory(handle, (LPCVOID)(address + 0x08), &uptr->p, sizeof(INT_PTR), NULL);
 	if (!success)
 		return push_last_error(L, p_readError);
 
@@ -332,14 +331,14 @@ int l_read_array(lua_State *L)
 }
 int l_read_rowidx(lua_State *L)
 {
-	char *address = lmr_to_pointer(L, L->base);
+	INT_PTR address = lmr_to_pointer(L, L->base);
 	SIZE_T offset = lmr_to_size_t(L, L->base + 1);
 	address += offset;
-	char *base = lmr_to_pointer(L, L->base + 2);
+	INT_PTR base = lmr_to_pointer(L, L->base + 2);
 	lua_Number row_size = lua_tonumber(L, 4);
 
 	HANDLE handle = GetCurrentProcess();
-	BOOL success = ReadProcessMemory(handle, address, &address, sizeof(LPVOID), NULL);
+	BOOL success = ReadProcessMemory(handle, (LPCVOID)address, &address, sizeof(INT_PTR), NULL);
 	if (!success)
 		return push_last_error(L, p_readError);
 
@@ -350,7 +349,7 @@ int l_read_rowidx(lua_State *L)
 }
 int l_read(lua_State *L)
 {
-	char *address = lmr_to_pointer(L, L->base);
+	INT_PTR address = lmr_to_pointer(L, L->base);
 	SIZE_T offset = lmr_to_size_t(L, L->base + 1);
 	// SIZE_T bytes = lmr_to_size_t(L, L->base + 2);
 	SIZE_T bytes = lua_tonumber(L, 3);
@@ -364,12 +363,12 @@ int l_read(lua_State *L)
 	SIZE_T numBytesRead;
 	HANDLE handle = GetCurrentProcess(); // no need to close
 
-	char *p;
+	INT_PTR p;
 	if (bytes < sizeof(read_buffer))
 		p = read_buffer;
 	else
 		p = malloc(bytes);
-	BOOL success = ReadProcessMemory(handle, address + offset, p, bytes, &numBytesRead);
+	BOOL success = ReadProcessMemory(handle, (LPCVOID)(address + offset), (LPVOID)p, bytes, &numBytesRead);
 	if (!success)
 	{
 		if (p != read_buffer)
@@ -385,7 +384,7 @@ int l_read(lua_State *L)
 
 int l_write(lua_State *L)
 {
-	char *address = lmr_to_pointer(L, L->base);
+	INT_PTR address = lmr_to_pointer(L, L->base);
 	SIZE_T offset = lmr_to_size_t(L, L->base + 1);
 	address += offset;
 	const TValue *o = L->base + 2;
@@ -396,20 +395,20 @@ int l_write(lua_State *L)
 	switch (o->tt)
 	{
 	case LUA_TBOOLEAN:
-		if (!WriteProcessMemory(handle, address, &o->value.b, sizeof(BOOL), NULL))
+		if (!WriteProcessMemory(handle, (LPVOID)address, &o->value.b, sizeof(BOOL), NULL))
 			return push_last_error(L, p_writeError);
 	case LUA_TNUMBER:
-		if (!WriteProcessMemory(handle, address, &o->value.n, sizeof(lua_Number), NULL))
+		if (!WriteProcessMemory(handle, (LPVOID)address, &o->value.n, sizeof(lua_Number), NULL))
 			return push_last_error(L, p_writeError);
 	case LUA_TSTRING:
-		if (!WriteProcessMemory(handle, address, svalue(o), tsvalue(o)->len, NULL))
+		if (!WriteProcessMemory(handle, (LPVOID)address, svalue(o), tsvalue(o)->len, NULL))
 			return push_last_error(L, p_writeError);
 	case LUA_TUSERDATA:
 		u = get_udata(o);
 		switch (u->tt)
 		{
 		case LUA_TPOINTER:
-			size = sizeof(LPVOID);
+			size = sizeof(INT_PTR);
 			break;
 		case LUA_TUINT8:
 		case LUA_TINT8:
@@ -426,7 +425,7 @@ int l_write(lua_State *L)
 		default:
 			return luaL_error(L, p_typeError);
 		}
-		if (!WriteProcessMemory(handle, address, &u->uint32, size, NULL))
+		if (!WriteProcessMemory(handle, (LPVOID)address, &u->uint32, size, NULL))
 			return push_last_error(L, p_writeError);
 	}
 	return 0;
@@ -598,7 +597,7 @@ int l_add(lua_State *L)
 				uc->p = (ua->p) + (UINT32)(b->value.n);
 				return 1;
 			case LUA_TSTRING:
-				uc->p = (ua->p) + lmr_string_to_uint32(L, b);
+				uc->p = (ua->p) + lmr_string_to_uint32(b);
 				return 1;
 			case LUA_TUSERDATA:
 				ub = get_udata(b);
@@ -636,7 +635,7 @@ int l_sub(lua_State *L)
 				uc->p = (ua->p) - (UINT32)(b->value.n);
 				return 1;
 			case LUA_TSTRING:
-				uc->p = (ua->p) - lmr_string_to_uint32(L, b);
+				uc->p = (ua->p) - lmr_string_to_uint32(b);
 				return 1;
 			case LUA_TUSERDATA:
 				ub = get_udata(b);
@@ -698,7 +697,7 @@ int l_div(lua_State *L)
 				uc->p = ((ptrdiff_t)ua->p) / (UINT32)(b->value.n);
 				return 1;
 			case LUA_TSTRING:
-				uc->p = ((ptrdiff_t)ua->p) / lmr_string_to_uint32(L, b);
+				uc->p = ((ptrdiff_t)ua->p) / lmr_string_to_uint32(b);
 				return 1;
 			case LUA_TUSERDATA:
 				ub = get_udata(b);

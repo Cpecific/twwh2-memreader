@@ -64,7 +64,7 @@ int udata_field_set_string(lua_State *L, void *v)
 }
 int udata_field_get_memaddress(lua_State *L, void *v)
 {
-	lmr_push_userdata(L, LUA_TPOINTER)->p = *(LPVOID *)v;
+	lmr_push_userdata(L, LUA_TPOINTER)->p = *(INT_PTR *)v;
 	return 1;
 }
 

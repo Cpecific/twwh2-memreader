@@ -5,7 +5,7 @@
 #define MEMREADER_METATABLE(t) "memreader." #t
 
 extern int push_error(lua_State *L, const char *msg);
-extern int push_last_error(lua_State *L);
+extern int push_last_error(lua_State *L, const char *msg);
 extern const char *get_lua_string(lua_State *L, int index);
 
 // Userdata Field Handling
