@@ -48,14 +48,12 @@ It is easy to recognise if you are inside of `hash` part. You will see continiou
 If you want to iterate over linked list, you should go from `tail` to the `head`. `head` always has `head->prev == nullptr`.\
 If you are inside `CA_Member<T>` and want to find you where the fuck is `CA_List<T>`, follow `next`, it will bring you to `CA_List<T>`.
 ```c++
-CA_Member<T> *cur, *list;
+CA_Member<T> *cur, *next;
 while (true) {
-    list = cur->next;
-    // because you treat every entry as `CA_Member<T>`,
-    // when your `list` points to `CA_List<T>`,
-    // you will actually read `CA_List<T>.prev`.
-    if (list->next == cur) { return (CA_List<T>*)list; }
-    cur = list;
+    next = cur->next;
+	// first element has `CA_Member<T>.prev=0`
+    if (next->prev == 0) { return (CA_List<T>*)(cur - 0x08); }
+    cur = next;
 }
 ```
 ```h
@@ -86,11 +84,11 @@ struct CA_List<T> {
 ```js
 // Points to the very first db table
 // They are not continious, some (DB_DATA) are overwritten with junk
-// [[[<Warhammer2.exe>+03601F98]+20]+10]
-// [[[base + 03601F40 + 50 + 08]+20]+10]
+// [[[<Warhammer2.exe>+03694798]+20]+10]
+// [[[base + 3694740 + 50 + 08]+20]+10]
 const b = require('@basic')
 const uic_db = require('@static/uic_db')
-let ptr = b.read_pointer(b.base, 0x03601F40) // @static/uic_db.base
+let ptr = b.read_pointer(b.base, 0x3694740) // @static/uic_db.base
 let uic_db_entry = b.read_instance(undefined, ptr, 0x00, uic_db.static_uic_db)
 for (const entry of uic_db_entry.uic_list.data()) { // uic_list: 0x50; prev: 0x08
     // prev(0): idx = 0
@@ -106,37 +104,14 @@ for (const entry of uic_db_entry.uic_list.data()) { // uic_list: 0x50; prev: 0x0
 -- UICreated @event
 -- Could also find where this `tab_completer` hides among root children?
 local ptr = mr.base
-ptr = read_pointer(ptr, '\152\31\96\3') -- 0x03601F98
+ptr = read_pointer(ptr, '\152\71\105\3') -- 0x03694798
 ptr = read_pointer(ptr, 0x20)
 ptr = read_pointer(ptr, 0x10)
 ```
 
 ### Current selected character (+hover)
-```js
-// There are several other UICs that point to current character.
-// Some of them point to actual selected character (not hover).
-// Would be pain in the ass to track them with pointer scan (did it, not fun).
-// Better to programmatically do it with js over all children of root.
-// [[[[[<Warhammer2.exe>+03737E08]+18]+50]+08]]
-// [[[[[base + 03737E00 + 08]+18]+50]+08]]
-const b = require('@basic')
-const { wrapPtr } = require('@basic/WrapPtr')
-const { UIC } = require('@uic')
-let ptr = b.base + 0x03737E00
-let arr = b.read_array(undefined, ptr, 0x00, wrapPtr(UIC))
-for (let uic of arr.data()) { // items[]: 0x08
-    uic = uic.data
-    // 0x18: idx = 4
-    if (uic.name === 'war_coordination_buttonset') {
-        let ptr = uic._pointer
-        ptr = b.read_pointer(ptr, 0x50) // UIC.cco_selected? => $uic__cco_selected?
-        ptr = b.read_pointer(ptr, 0x08) // @character.CharacterDetails
-        ptr = b.read_pointer(ptr, 0x00) // @character.Character
-        let cqi = b.read_int32(ptr, 0xF0)
-        break;
-    }
-}
-```
+After **Silence & The Fury** update, UIC data structures changed too much,
+and I can't figure them out. So, only lua example.
 #### LUA
 ```lua
 -- Does it already exist in UICreated? Does it get recreated at some conditions?
@@ -147,7 +122,7 @@ local CA_cip = root:SequentialFind(
     'info_panel_background',
     'CharacterInfoPopup')
 local ptr = ud_topointer(CA_cip)
-ptr = read_pointer(ptr, 0x00) -- @uic.UIC
+ptr = read_pointer(ptr, 0x18) -- @uic.UIC
 ptr = read_pointer(ptr, 0x50) -- cco_selected
 ptr = read_pointer(ptr, 0x08) -- @character.CharacterDetails
 ptr = read_pointer(ptr, 0x00) -- @character.Character
@@ -186,12 +161,12 @@ local cqi = read_int32(ptr, 0xF0)
 [0x09] = 'ebv_faction'
 [0x12] = 'ebv_id_action_results_additional_outcomes'
 [0x1A] = 'ebv_ids_units_sets'
-[0x28] = 'ebv_loyalty_event'
-[0x2B] = 'ebv_missile_weapon'
+[0x29] = 'ebv_loyalty_event'
+[0x2C] = 'ebv_missile_weapon'
 [0x1F] = 'ebv_name_record'
 [0x23] = 'ebv_military_force_ability'
-[0x29] = 'ebv_pooled_resource_facotr'
-[0x2A] = 'ebv_pooled_resource'
+[0x2A] = 'ebv_pooled_resource_factor'
+[0x2B] = 'ebv_pooled_resource'
 [0x03] = 'ebv_population_class' (doesn't exist)
 [????] = 'ebv_population_class_and_religion' (doesn't load)
 [0x05] = 'ebv_projectile' (works)
@@ -199,7 +174,7 @@ local cqi = read_int32(ptr, 0xF0)
 [0x13] = 'ebv_provincial_initiative_effect_record'
 [0x07] = 'ebv_religion'
 [0x0A] = 'ebv_resource'
-[0x2C] = 'ebv_ritual_category'
+[0x2D] = 'ebv_ritual_category'
 [0x25] = 'ebv_ritual_chains' (works)
 [0x24] = 'ebv_ritual'
 [0x10] = 'ebv_siege_item'
@@ -216,6 +191,7 @@ local cqi = read_int32(ptr, 0xF0)
 [0x0C] = 'ebv_unit_class' (works)
 [????] = 'ebv_unit_class_stat_modifiers' (doesn't load)
 [0x0F] = 'ebv_unit_record'
-[0x27] = 'ebv_unit_set_unit_ability'
-[0x26] = 'ebv_unit_set_unit_attribute'
+[0x26] = 'ebv_unit_set_special_ability_phase'
+[0x28] = 'ebv_unit_set_unit_ability'
+[0x27] = 'ebv_unit_set_unit_attribute'
 ```

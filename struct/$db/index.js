@@ -1,4 +1,6 @@
 const assert = require('assert');
+const path = require('path');
+const fs = require('fs');
 const b = require('@basic');
 const { wrapPtr } = require('@basic/WrapPtr');
 
@@ -24,12 +26,13 @@ const DB_TABLE = b.define(class DB_TABLE {
 exports.DB_DATA = DB_DATA;
 exports.DB_TABLE = DB_TABLE;
 
-let base = b.read_pointer(b.base, 0x03601F98);
+let base = b.read_pointer(b.base, 0x03694798);
 base = b.read_pointer(base, 0x20);
 base = b.read_pointer(base, 0x10);
 exports.base = base;
 
 const tables = {};
+// let output = [];
 let ptr = base;
 for (let idx = 0; idx < 1200; ++idx) {
 	let p = b.read_pointer(ptr, 0x00);
@@ -37,8 +40,10 @@ for (let idx = 0; idx < 1200; ++idx) {
 	if (typeof tbl_name === 'string') {
 		tables[tbl_name] = idx;
 	}
+	// output.push(typeof tbl_name === 'string' ? tbl_name : 'nil');
 	ptr += 56;
 }
+// fs.writeFileSync(path.join(__dirname, '$tables2.txt'), output.join('\n'))
 
 exports.getTable = (idx, struct) => {
 	if (typeof idx !== 'number') {

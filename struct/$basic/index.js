@@ -1,9 +1,10 @@
 const assert = require('assert');
 const memoryjs = require('memoryjs');
 
-const { handle, modBaseAddr: base } = memoryjs.openProcess('Warhammer2.exe');
+let { handle, modBaseAddr: base } = memoryjs.openProcess('Warhammer2.exe');
 assert(handle);
 
+// base = 0x140000000;
 exports.base = base;
 
 const printPointer = pointer => {
