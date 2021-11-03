@@ -26,7 +26,7 @@ const DB_TABLE = b.define(class DB_TABLE {
 exports.DB_DATA = DB_DATA;
 exports.DB_TABLE = DB_TABLE;
 
-let base = b.read_pointer(b.base, 0x03694798);
+let base = b.read_pointer(b.base, 0x03695798);
 base = b.read_pointer(base, 0x20);
 base = b.read_pointer(base, 0x10);
 exports.base = base;

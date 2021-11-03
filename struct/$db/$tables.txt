@@ -1087,8 +1087,8 @@ animated
 trigger_effects_tables
 trigger_event_to_excluded_agent_types_tables
 trigger_events_tables
-nil
-nil
+
+
 nil
 advice_levels_tables
 advice_threads_tables
@@ -1191,10 +1191,9 @@ nil
 faction_uniform_colours_tables
 building_benefit_categories_tables
 building_to_building_benefit_junctions_tables
-nil
-nil
-nil
-nil
-nil
-nil
-nil
+
+
+
+
+
+

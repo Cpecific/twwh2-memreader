@@ -84,11 +84,11 @@ struct CA_List<T> {
 ```js
 // Points to the very first db table
 // They are not continious, some (DB_DATA) are overwritten with junk
-// [[[<Warhammer2.exe>+03694798]+20]+10]
-// [[[base + 3694740 + 50 + 08]+20]+10]
+// [[[<Warhammer2.exe>+03695798]+20]+10]
+// [[[base + 03695740 + 50 + 08]+20]+10]
 const b = require('@basic')
 const uic_db = require('@static/uic_db')
-let ptr = b.read_pointer(b.base, 0x3694740) // @static/uic_db.base
+let ptr = b.read_pointer(b.base, 0x03695740) // @static/uic_db.base
 let uic_db_entry = b.read_instance(undefined, ptr, 0x00, uic_db.static_uic_db)
 for (const entry of uic_db_entry.uic_list.data()) { // uic_list: 0x50; prev: 0x08
     // prev(0): idx = 0
@@ -104,7 +104,7 @@ for (const entry of uic_db_entry.uic_list.data()) { // uic_list: 0x50; prev: 0x0
 -- UICreated @event
 -- Could also find where this `tab_completer` hides among root children?
 local ptr = mr.base
-ptr = read_pointer(ptr, '\152\71\105\3') -- 0x03694798
+ptr = read_pointer(ptr, '\152\87\105\3') -- 0x03695798
 ptr = read_pointer(ptr, 0x20)
 ptr = read_pointer(ptr, 0x10)
 ```

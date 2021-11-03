@@ -2,7 +2,7 @@ const b = require('@basic');
 const { linkedList } = require('@basic/LinkedList');
 const { UIC } = require('@uic');
 
-let ptr = b.base + 0x03694740;
+let ptr = b.base + 0x03695740;
 exports.base = ptr;
 
 const uic_db_entry = b.define(class uic_db_entry {

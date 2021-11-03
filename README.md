@@ -275,7 +275,7 @@ core:add_listener(
     function(context)
         root = core.ui_root
         local ptr = mr.base
-        ptr = read_pointer(ptr, '\152\31\96\3') -- 0x03601F98
+        ptr = read_pointer(ptr, '\152\87\105\3') -- 0x03695798
         ptr = read_pointer(ptr, 0x20)
         ptr = read_pointer(ptr, 0x10)
         static_ptr = ptr ---@static_ptr
